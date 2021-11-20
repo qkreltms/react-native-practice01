@@ -4,6 +4,7 @@ import { SafeAreaProvider } from "react-native-safe-area-context";
 import { Text, View } from "./components/Themed";
 import {
   Button,
+  FlatList,
   Linking,
   RefreshControl,
   ScrollView,
@@ -41,24 +42,31 @@ export default function App() {
         {/* <Navigation colorScheme={colorScheme} />
         <StatusBar /> */}
         <View style={styles.body}>
-          <ScrollView
+          {/* 스크롤 뷰에 데이터가 많아지면 성능 이슈 발생 => flat list를 사용해 list 재사용하도록 구현 */}
+          <FlatList
+            data={list}
+            // 아래의 속성이 붙으면 새로고침도 아래에서 해야됨
+            inverted
+            // horizontal에서는 num columns 지원하지 않음
             horizontal={false}
+            // numColumns와 key값이 동일해야됨
+            numColumns={2}
+            key={2}
+            keyExtractor={(item, index) => index.toString()}
+            renderItem={({ item }) => (
+              <View style={styles.item}>
+                <Text>{item.name}</Text>
+              </View>
+            )}
             refreshControl={
               <RefreshControl
                 refreshing={refreshing}
                 onRefresh={onRefresh}
-                colors={["#FF00FF"]}
+                colors={["#ff00ff"]}
               />
             }
-          >
-            {list.map((item) => {
-              return (
-                <View style={styles.item} key={item.key}>
-                  <Text>{item.name}</Text>
-                </View>
-              );
-            })}
-          </ScrollView>
+          />
+
           <Text>test with {name}</Text>
           <Button
             title="naver"
