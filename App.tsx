@@ -1,43 +1,41 @@
-import { StatusBar } from "expo-status-bar";
 import React, { useState } from "react";
 import { SafeAreaProvider } from "react-native-safe-area-context";
 import { Text, View } from "./components/Themed";
 import {
+  Alert,
   Button,
-  FlatList,
-  Linking,
-  RefreshControl,
-  ScrollView,
-  SectionList,
+  Pressable,
   StyleSheet,
+  TextInput,
+  ToastAndroid,
+  TouchableHighlight,
+  TouchableOpacity,
+  TouchableWithoutFeedback,
 } from "react-native";
 
 import useCachedResources from "./hooks/useCachedResources";
-import useColorScheme from "./hooks/useColorScheme";
-import Navigation from "./navigation";
-import { tSExpressionWithTypeArguments } from "@babel/types";
 
 export default function App() {
   const isLoadingComplete = useCachedResources();
-  const [name, setName] = useState("JeonghHoon");
-  const [list, setList] = useState(
-    Array.from({ length: 100 }, (_, i) => ({
-      key: i + 1,
-      name: `${i + 1}`,
-    }))
-  );
-  const DATA = [
-    { title: "title 1", data: ["ITEM 1-1"] },
-    { title: "title 2", data: ["ITEM 1-1"] },
-    { title: "title 3", data: ["ITEM 1-1"] },
-  ];
-  const [refreshing, setRefreshing] = useState(false);
-  const onRefresh = () => {
-    setRefreshing(true);
-    console.log(list.slice(1));
-    const newList = [{ key: 1, name: "onRefresh" }, ...list.slice(0)];
-    setList(newList);
-    setRefreshing(false);
+  const [submitted, setSubmitted] = useState(false);
+  const [name, setName] = useState("");
+  const onPress = () => {
+    Alert.alert(
+      "Warning",
+      "ERROR!!",
+      [
+        { text: "okay~~", onPress: () => console.warn("okay~~") },
+        {
+          text: "CANCEL!!!",
+        },
+        { text: "NOOOO!!!" },
+      ],
+      { cancelable: true, onDismiss: () => console.error("DISMISSED!!") }
+    );
+
+    ToastAndroid.show("토스트 먹자", ToastAndroid.LONG);
+    // showWithGravity, showWithGravityAndOffset 함수를 사용하면 토스트 나타날 위치 지정 가능
+    setSubmitted((b) => !b);
   };
 
   if (!isLoadingComplete) {
@@ -45,37 +43,62 @@ export default function App() {
   } else {
     return (
       <SafeAreaProvider>
-        {/* <Navigation colorScheme={colorScheme} />
-        <StatusBar /> */}
         <View style={styles.body}>
-          <SectionList
-            keyExtractor={(item, index) => index.toString()}
-            sections={DATA}
-            renderItem={({ item }) => (
-              <View style={styles.item}>
-                <Text style={styles.text}>{item}</Text>
-              </View>
-            )}
-            renderSectionHeader={({ section }) => (
-              <View style={styles.item}>
-                <Text style={styles.text}>{section.title}</Text>
-              </View>
-            )}
+          <Text style={styles.text}>Please write your name</Text>
+          <TextInput
+            style={styles.input}
+            placeholder="placeholder"
+            onChangeText={(value) => setName(value)}
+            multiline
+            keyboardType="number-pad"
+            maxLength={2}
+            // disabled 설정
+            editable={false}
+            //  비밀번호 입력
+            // secureTextEntry
           />
-
-          <Text>test with {name}</Text>
+          {/* 일반적인 버튼 */}
           <Button
-            title="naver"
-            onPress={() => {
-              Linking.openURL("https://naver.com");
-            }}
+            title={submitted ? "Clear" : "Submit"}
+            onPress={onPress}
+            disabled={submitted}
+            color="#00f"
           />
-          <Button
-            title="name"
-            onPress={() => {
-              setName(`test${new Date()}`);
-            }}
-          />
+          {/* 하위 컴포넌트에 터치 기능을 추가해주는 컴포넌트, 이미지 등에 적용가능 */}
+          <TouchableOpacity
+            onPress={onPress}
+            style={styles.button}
+            activeOpacity={0.6}
+          >
+            <Text>{submitted ? "Clear" : "Submit"}</Text>
+          </TouchableOpacity>
+          {/* Opacity에 추가적으로 클릭시 사용할 색도 넣어주는 컴포넌트 인듯 */}
+          <TouchableHighlight
+            onPress={onPress}
+            style={styles.button}
+            activeOpacity={0.5}
+            underlayColor="#ee3434"
+          >
+            <Text>{submitted ? "Clear" : "Submit"}</Text>
+          </TouchableHighlight>
+          {/* 터치 피드백을 주지 않음 */}
+          <TouchableWithoutFeedback onPress={onPress} style={styles.button}>
+            <Text>{submitted ? "Clear" : "Submit"}</Text>
+          </TouchableWithoutFeedback>
+          {/* Pressable is a Core Component wrapper  */}
+          {/* 참고: https://reactnative.dev/docs/pressable */}
+          <Pressable
+            onPress={onPress}
+            // 터치 가능한 영역 크기 결정
+            hitSlop={{ top: 10, bottom: 10, right: 10, left: 10 }}
+            android_ripple={{ color: "#00f" }}
+            style={({ pressed }) => [
+              { backgroundColor: pressed ? "#dddddd" : "#00ff00" },
+            ]}
+          >
+            <Text>{submitted ? "Clear" : "Submit"}</Text>
+          </Pressable>
+          {submitted && <Text>{name}</Text>}
         </View>
       </SafeAreaProvider>
     );
@@ -93,4 +116,16 @@ const styles = StyleSheet.create({
     alignContent: "center",
   },
   text: {},
+  input: {
+    borderWidth: 1,
+    // 화면 해상도에 상관없는 단위로 설정됨
+    width: 200,
+    borderColor: "#4ae1fa",
+  },
+  button: {
+    width: 150,
+    height: 50,
+    backgroundColor: "#00ff00",
+    alignItems: "center",
+  },
 });
