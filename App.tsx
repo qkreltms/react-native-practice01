@@ -4,6 +4,7 @@ import { Text, View } from "./components/Themed";
 import {
   Alert,
   Button,
+  Modal,
   Pressable,
   StyleSheet,
   TextInput,
@@ -19,6 +20,7 @@ export default function App() {
   const isLoadingComplete = useCachedResources();
   const [submitted, setSubmitted] = useState(false);
   const [name, setName] = useState("");
+  const [isShowModal, setIsShowModal] = useState(false);
   const onPress = () => {
     Alert.alert(
       "Warning",
@@ -33,6 +35,7 @@ export default function App() {
       { cancelable: true, onDismiss: () => console.error("DISMISSED!!") }
     );
 
+    setIsShowModal(true);
     ToastAndroid.show("토스트 먹자", ToastAndroid.LONG);
     // showWithGravity, showWithGravityAndOffset 함수를 사용하면 토스트 나타날 위치 지정 가능
     setSubmitted((b) => !b);
@@ -43,6 +46,21 @@ export default function App() {
   } else {
     return (
       <SafeAreaProvider>
+        <Modal
+          visible={isShowModal}
+          // 바탕화면 불투명
+          transparent
+          // back 버튼 누를 때 작업
+          onRequestClose={() => setIsShowModal(false)}
+          animationType="fade"
+          hardwareAccelerated
+          // modal이 status아래에 있을지 결정하는 속성 true이면 오히려 status bar를 가리는데??
+          // statusBarTranslucent
+        >
+          <View style={styles.modal}>
+            <Text>HI I"M MODAL!!</Text>
+          </View>
+        </Modal>
         <View style={styles.body}>
           <Text style={styles.text}>Please write your name</Text>
           <TextInput
@@ -127,5 +145,10 @@ const styles = StyleSheet.create({
     height: 50,
     backgroundColor: "#00ff00",
     alignItems: "center",
+  },
+  modal: {
+    width: 300,
+    height: 300,
+    backgroundColor: "#4ae1fa",
   },
 });
