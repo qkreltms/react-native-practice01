@@ -8,6 +8,7 @@ import {
   Linking,
   RefreshControl,
   ScrollView,
+  SectionList,
   StyleSheet,
 } from "react-native";
 
@@ -25,6 +26,11 @@ export default function App() {
       name: `${i + 1}`,
     }))
   );
+  const DATA = [
+    { title: "title 1", data: ["ITEM 1-1"] },
+    { title: "title 2", data: ["ITEM 1-1"] },
+    { title: "title 3", data: ["ITEM 1-1"] },
+  ];
   const [refreshing, setRefreshing] = useState(false);
   const onRefresh = () => {
     setRefreshing(true);
@@ -42,29 +48,19 @@ export default function App() {
         {/* <Navigation colorScheme={colorScheme} />
         <StatusBar /> */}
         <View style={styles.body}>
-          {/* 스크롤 뷰에 데이터가 많아지면 성능 이슈 발생 => flat list를 사용해 list 재사용하도록 구현 */}
-          <FlatList
-            data={list}
-            // 아래의 속성이 붙으면 새로고침도 아래에서 해야됨
-            inverted
-            // horizontal에서는 num columns 지원하지 않음
-            horizontal={false}
-            // numColumns와 key값이 동일해야됨
-            numColumns={2}
-            key={2}
+          <SectionList
             keyExtractor={(item, index) => index.toString()}
+            sections={DATA}
             renderItem={({ item }) => (
               <View style={styles.item}>
-                <Text>{item.name}</Text>
+                <Text style={styles.text}>{item}</Text>
               </View>
             )}
-            refreshControl={
-              <RefreshControl
-                refreshing={refreshing}
-                onRefresh={onRefresh}
-                colors={["#ff00ff"]}
-              />
-            }
+            renderSectionHeader={({ section }) => (
+              <View style={styles.item}>
+                <Text style={styles.text}>{section.title}</Text>
+              </View>
+            )}
           />
 
           <Text>test with {name}</Text>
@@ -96,4 +92,5 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     alignContent: "center",
   },
+  text: {},
 });
