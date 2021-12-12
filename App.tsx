@@ -45,8 +45,13 @@ const App = () => {
               name="Screen_A"
               component={ScreenA}
               options={{ tabBarBadge: 3 }}
+              initialParams={{ itemName: "Item from app" }}
             />
-            <Tab.Screen name="Screen_B" component={ScreenB} />
+            <Tab.Screen
+              name="Screen_B"
+              component={ScreenB}
+              initialParams={{ itemName: "Item from app" }}
+            />
           </Tab.Navigator>
         </NavigationContainer>
       </SafeAreaProvider>
