@@ -22,7 +22,8 @@ const Login = ({ navigation, route }: LoginProps) => {
     }
 
     try {
-      await AsyncStorageLib.setItem("user-name", id);
+      const userName = JSON.stringify({ userName: id });
+      await AsyncStorageLib.setItem("user-name", userName);
       navigation.navigate("Home");
     } catch (error) {
       console.error(error);
