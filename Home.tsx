@@ -1,14 +1,26 @@
 import React, { memo, useLayoutEffect, useState } from "react";
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import { Button, StyleSheet, Text, View } from "react-native";
-import AsyncStorageLib from "@react-native-async-storage/async-storage";
 import { TextInput } from "react-native-gesture-handler";
 import { useIsFocused, useNavigation } from "@react-navigation/native";
+import SQLite from "react-native-sqlite-storage";
 
 /**
  * Async Storage
  * unencrypted, Asynchronouse, Persistent, Key-value Storage System, Global Local Storage
  */
+
+const db = SQLite.openDatabase(
+  {
+    name: "MainDB",
+    location: "default",
+  },
+  () => {},
+  (error) => {
+    console.log(error);
+  }
+);
+
 interface HomeProps {}
 const Home = (props: HomeProps) => {
   const navigation =
@@ -18,11 +30,20 @@ const Home = (props: HomeProps) => {
   const [newName, setNewName] = useState("");
   const getName = async () => {
     try {
-      console.log((await AsyncStorageLib.getItem("user-name")) || "{}");
-      const { userName } = JSON.parse(
-        (await AsyncStorageLib.getItem("user-name")) || "{}"
-      );
-      setName(userName);
+      db.transaction((tx) => {
+        tx.executeSql(`SELECT * FROM Users?`, [], (tx, results) => {
+          const len = results.rows.length;
+          if (len > 0) {
+            const userName = results.rows.item(0).Name;
+            const userAge = results.rows.item(0).Age;
+            setName(userName);
+          }
+        });
+      });
+      // const { userName } = JSON.parse(
+      //   (await AsyncStorageLib.getItem("user-name")) || "{}"
+      // );
+      // setName(userName);
     } catch (error) {
       console.error(error);
     }
@@ -30,15 +51,14 @@ const Home = (props: HomeProps) => {
 
   const updateUserName = async () => {
     try {
-      const { userName } = JSON.parse(
-        (await AsyncStorageLib.getItem("user-name")) || "{}"
-      );
-
-      if (userName) {
-        const userName = JSON.stringify({ userName: newName });
-        await AsyncStorageLib.setItem("user-name", userName);
+      db.transaction((tx) => {
+        tx.executeSql(`UPDATE Users SET Name=?`, [newName]);
         setName(newName);
-      }
+      });
+
+      // const userName = JSON.stringify({ userName: newName });
+      // await AsyncStorageLib.setItem("user-name", userName);
+      // setName(newName);
     } catch (error) {
       console.error(error);
     } finally {
@@ -48,7 +68,8 @@ const Home = (props: HomeProps) => {
 
   const deleteUserName = async () => {
     try {
-      await AsyncStorageLib.removeItem("user-name");
+      // await AsyncStorageLib.removeItem("user-name");
+      db.executeSql(`DELETE FROM Users WHERE Name=?`, [name]);
       navigation.navigate("Login");
     } catch (error) {
       console.error(error);
